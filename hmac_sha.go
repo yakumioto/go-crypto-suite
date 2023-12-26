@@ -5,34 +5,38 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/sha512"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"hash"
+	"strconv"
 )
 
-type HmacShaKey[T ~[]byte | ~string] struct {
+type hmacShaKeyImpl[T DataType] struct {
 	key       []byte
 	algorithm Algorithm
 }
 
-func (h *HmacShaKey[T]) AlgorithmType() AlgorithmType {
+func (h *hmacShaKeyImpl[T]) AlgorithmType() AlgorithmType {
 	return GetTypeByAlgorithm(h.algorithm)
 }
 
-func (h *HmacShaKey[T]) Bytes() ([]byte, error) {
+func (h *hmacShaKeyImpl[T]) Bytes() ([]byte, error) {
 	return h.key, nil
 }
 
-func (h *HmacShaKey[T]) SKI() []byte {
+func (h *hmacShaKeyImpl[T]) SKI() []byte {
 	sha := sha256.New()
 	sha.Write(h.key)
+
 	return sha.Sum(nil)
 }
 
-func (h *HmacShaKey[T]) PublicKey() (Key[T], error) {
+func (h *hmacShaKeyImpl[T]) PublicKey() (Key[T], error) {
 	return nil, fmt.Errorf("cannot call this method on a hmac sha key")
 }
 
-func (h *HmacShaKey[T]) Sign(digest T) ([]byte, error) {
+func (h *hmacShaKeyImpl[T]) Sign(msg T) (digest T, err error) {
 	var hc hash.Hash
 	switch h.algorithm {
 	case HmacSha256:
@@ -40,41 +44,42 @@ func (h *HmacShaKey[T]) Sign(digest T) ([]byte, error) {
 	case HmacSha512:
 		hc = hmac.New(sha512.New, h.key)
 	default:
-		return nil, fmt.Errorf("not support %v algorithm", GetTypeByAlgorithm(h.algorithm))
+		err = fmt.Errorf("not support %v algorithm", GetTypeByAlgorithm(h.algorithm))
+		return
 	}
 
-	switch digest := any(digest).(type) {
-	case string:
-		hc.Write([]byte(digest))
-	case []byte:
-		hc.Write(digest)
-	}
+	hc.Write(toBytes(msg))
 
-	return hc.Sum(nil), nil
+	data := bytes.NewBuffer(nil)
+	data.WriteString(strconv.Itoa(int(h.algorithm)))
+	data.WriteString(".")
+	data.WriteString(base64.StdEncoding.EncodeToString(hc.Sum(nil)))
+
+	return convertToT[T](T(data.Bytes())), nil
 }
 
-func (h *HmacShaKey[T]) Verify(hash T, sig []byte) bool {
-	digest, err := h.Sign(hash)
+func (h *hmacShaKeyImpl[T]) Verify(msg, digest T) bool {
+	newDigest, err := h.Sign(msg)
 	if err != nil {
 		return false
 	}
 
-	return bytes.Equal(digest, sig)
+	return bytes.Equal(toBytes(newDigest), toBytes(digest))
 }
 
-func (h *HmacShaKey[T]) Encrypt(src T) ([]byte, error) {
-	//TODO implement me
-	panic("implement me")
+func (h *hmacShaKeyImpl[T]) Encrypt(_ T) (ciphertext T, err error) {
+	err = errors.New("cannot call this method on a hmac hash")
+	return
 }
 
-func (h *HmacShaKey[T]) Decrypt(src T) ([]byte, error) {
-	//TODO implement me
-	panic("implement me")
+func (h *hmacShaKeyImpl[T]) Decrypt(_ T) (plaintext T, err error) {
+	err = errors.New("cannot call this method on a hmac hash")
+	return
 }
 
-type HmacShaKeyImporter[T ~[]byte | ~string] struct{}
+type hmacShaKeyImportImpl[T DataType] struct{}
 
-func (h *HmacShaKeyImporter[T]) KeyImport(raw interface{}, alg Algorithm) (Key[T], error) {
+func (h *hmacShaKeyImportImpl[T]) KeyImport(raw interface{}, alg Algorithm) (Key[T], error) {
 	var key []byte
 
 	switch raw := raw.(type) {
@@ -88,15 +93,11 @@ func (h *HmacShaKeyImporter[T]) KeyImport(raw interface{}, alg Algorithm) (Key[T
 
 	switch alg {
 	case HmacSha256, HmacSha512:
-		return &HmacShaKey[T]{
+		return &hmacShaKeyImpl[T]{
 			key:       key,
 			algorithm: alg,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported aes algorithm: %v", GetTypeByAlgorithm(alg))
 	}
-}
-
-func HmacShaKeyImport[T ~[]byte | ~string](raw interface{}, alg Algorithm) (Key[T], error) {
-	return new(HmacShaKeyImporter[T]).KeyImport(raw, alg)
 }

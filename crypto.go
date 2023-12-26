@@ -1,24 +1,24 @@
 package crypto
 
-type Input interface {
+type DataType interface {
 	~[]byte | ~string
 }
 
-type Key[T Input] interface {
+type Key[T DataType] interface {
 	AlgorithmType() AlgorithmType
 	Bytes() ([]byte, error)
 	SKI() []byte
 	PublicKey() (Key[T], error)
-	Sign(hash T) ([]byte, error)
-	Verify(hash T, sig []byte) bool
-	Encrypt(src T) ([]byte, error)
-	Decrypt(src T) ([]byte, error)
+	Sign(msg T) (digest T, err error)
+	Verify(msg, digest T) bool
+	Encrypt(plaintext T) (ciphertext T, err error)
+	Decrypt(ciphertext T) (plaintext T, err error)
 }
 
-type KeyGenerator[T ~[]byte | ~string] interface {
+type KeyGenerator[T DataType] interface {
 	KeyGen(alg Algorithm) (Key[T], error)
 }
 
-type KeyImporter[T ~[]byte | ~string] interface {
+type KeyImporter[T DataType] interface {
 	KeyImport(raw interface{}, alg Algorithm) (Key[T], error)
 }
