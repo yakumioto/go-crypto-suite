@@ -1,16 +1,9 @@
 package crypto
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
-
-func TestHmacShaKey(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "HmacShaKey Suite")
-}
 
 var _ = Describe("HmacShaKey", func() {
 	Describe("key by bytes", func() {
@@ -20,24 +13,34 @@ var _ = Describe("HmacShaKey", func() {
 			err       error
 		)
 
-		Context("", func() {
+		Context("with valid parameters", func() {
 			It("should be created successfully", func() {
-				key, err = (new(hmacShaKeyImportImpl[[]byte])).KeyImport([]byte("123456"), HmacSha256)
+				key, err = new(hmacShaKeyImportImpl[[]byte]).KeyImport([]byte("123456"), HmacSha256)
 				Expect(err).To(BeNil())
 			})
-		})
 
-		Context("", func() {
 			It("should be signed successfully", func() {
 				signature, err = key.Sign([]byte("hello world"))
 				Expect(err).To(BeNil())
 				Expect(signature).ToNot(BeNil())
 			})
-		})
 
-		Context("", func() {
 			It("should be verified successfully", func() {
 				Expect(key.Verify([]byte("hello world"), signature)).To(BeTrue())
+			})
+		})
+
+		Context("with invalid key", func() {
+			It("should fail to create key", func() {
+				_, err = new(hmacShaKeyImportImpl[[]byte]).KeyImport([]byte(""), HmacSha256) // Empty key
+				Expect(err).ToNot(BeNil())
+			})
+		})
+
+		Context("with incorrect signature", func() {
+			It("should not verify successfully", func() {
+				incorrectSignature := []byte("incorrect_signature")
+				Expect(key.Verify([]byte("hello world"), incorrectSignature)).To(BeFalse())
 			})
 		})
 	})
@@ -49,24 +52,34 @@ var _ = Describe("HmacShaKey", func() {
 			err       error
 		)
 
-		Context("", func() {
+		Context("with valid parameters", func() {
 			It("should be created successfully", func() {
-				key, err = (new(hmacShaKeyImportImpl[string])).KeyImport("123456", HmacSha256)
+				key, err = new(hmacShaKeyImportImpl[string]).KeyImport("123456", HmacSha256)
 				Expect(err).To(BeNil())
 			})
-		})
 
-		Context("", func() {
 			It("should be signed successfully", func() {
 				signature, err = key.Sign("hello world")
 				Expect(err).To(BeNil())
 				Expect(signature).ToNot(BeNil())
 			})
-		})
 
-		Context("", func() {
 			It("should be verified successfully", func() {
 				Expect(key.Verify("hello world", signature)).To(BeTrue())
+			})
+		})
+
+		Context("with invalid key", func() {
+			It("should fail to create key", func() {
+				_, err = new(hmacShaKeyImportImpl[[]byte]).KeyImport([]byte(""), HmacSha256) // Empty key
+				Expect(err).ToNot(BeNil())
+			})
+		})
+
+		Context("with incorrect signature", func() {
+			It("should not verify successfully", func() {
+				incorrectSignature := "incorrect_signature"
+				Expect(key.Verify("hello world", incorrectSignature)).To(BeFalse())
 			})
 		})
 	})

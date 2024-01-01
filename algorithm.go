@@ -24,10 +24,16 @@ const (
 	AesCbc128 Algorithm = iota + SymmetricType + 1
 	AesCbc192
 	AesCbc256
+	AesGcm128
+	AesGcm192
+	AesGcm256
 
 	TypeAesCbc128 AlgorithmType = "AES_CBC_128"
 	TypeAesCbc192 AlgorithmType = "AES_CBC_192"
 	TypeAesCbc256 AlgorithmType = "AES_CBC_256"
+	TypeAesGcm128 AlgorithmType = "AES_GCM_128"
+	TypeAesGcm192 AlgorithmType = "AES_GCM_192"
+	TypeAesGcm256 AlgorithmType = "AES_GCM_256"
 )
 
 // asymmetric algorithms type
@@ -52,6 +58,9 @@ var (
 		TypeAesCbc128:  AesCbc128,
 		TypeAesCbc192:  AesCbc192,
 		TypeAesCbc256:  AesCbc256,
+		TypeAesGcm128:  AesGcm128,
+		TypeAesGcm192:  AesGcm192,
+		TypeAesGcm256:  AesGcm256,
 		TypeEcdsaP256:  EcdsaP256,
 		TypeEcdsaP384:  EcdsaP384,
 		TypeRsa1024:    Rsa1024,
@@ -65,6 +74,9 @@ var (
 		AesCbc128:  TypeAesCbc128,
 		AesCbc192:  TypeAesCbc192,
 		AesCbc256:  TypeAesCbc256,
+		AesGcm128:  TypeAesGcm128,
+		AesGcm192:  TypeAesGcm192,
+		AesGcm256:  TypeAesGcm256,
 		EcdsaP256:  TypeEcdsaP256,
 		EcdsaP384:  TypeEcdsaP384,
 		Rsa1024:    TypeRsa1024,

@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"hash"
 	"strconv"
@@ -33,7 +32,7 @@ func (h *hmacShaKeyImpl[T]) SKI() []byte {
 }
 
 func (h *hmacShaKeyImpl[T]) PublicKey() (Key[T], error) {
-	return nil, fmt.Errorf("cannot call this method on a hmac sha key")
+	return nil, ErrUnsupportedMethod
 }
 
 func (h *hmacShaKeyImpl[T]) Sign(msg T) (digest T, err error) {
@@ -55,7 +54,7 @@ func (h *hmacShaKeyImpl[T]) Sign(msg T) (digest T, err error) {
 	data.WriteString(".")
 	data.WriteString(base64.StdEncoding.EncodeToString(hc.Sum(nil)))
 
-	return convertToT[T](T(data.Bytes())), nil
+	return T(data.Bytes()), nil
 }
 
 func (h *hmacShaKeyImpl[T]) Verify(msg, digest T) bool {
@@ -68,27 +67,21 @@ func (h *hmacShaKeyImpl[T]) Verify(msg, digest T) bool {
 }
 
 func (h *hmacShaKeyImpl[T]) Encrypt(_ T) (ciphertext T, err error) {
-	err = errors.New("cannot call this method on a hmac hash")
+	err = ErrUnsupportedMethod
 	return
 }
 
 func (h *hmacShaKeyImpl[T]) Decrypt(_ T) (plaintext T, err error) {
-	err = errors.New("cannot call this method on a hmac hash")
+	err = ErrUnsupportedMethod
 	return
 }
 
 type hmacShaKeyImportImpl[T DataType] struct{}
 
 func (h *hmacShaKeyImportImpl[T]) KeyImport(raw interface{}, alg Algorithm) (Key[T], error) {
-	var key []byte
-
-	switch raw := raw.(type) {
-	case []byte:
-		key = raw
-	case string:
-		key = []byte(raw)
-	default:
-		return nil, fmt.Errorf("only supports string or []byte type of key")
+	key, err := checkAndConvertKey(raw)
+	if err != nil {
+		return nil, err
 	}
 
 	switch alg {
