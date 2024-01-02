@@ -8,9 +8,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/pbkdf2"
 	"strconv"
 	"strings"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
 type aesCbcKeyImpl[T DataType] struct {
@@ -37,12 +38,12 @@ func (a *aesCbcKeyImpl[T]) PublicKey() (Key[T], error) {
 	return nil, ErrUnsupportedMethod
 }
 
-func (a *aesCbcKeyImpl[T]) Sign(msg T) (digest T, err error) {
+func (a *aesCbcKeyImpl[T]) Sign(_ T) (digest T, err error) {
 	err = ErrUnsupportedMethod
 	return
 }
 
-func (a *aesCbcKeyImpl[T]) Verify(msg, digest T) bool {
+func (a *aesCbcKeyImpl[T]) Verify(_, _ T) bool {
 	return false
 }
 
@@ -142,12 +143,12 @@ func (a *aesGcmKeyImpl[T]) PublicKey() (Key[T], error) {
 	return nil, ErrUnsupportedMethod
 }
 
-func (a *aesGcmKeyImpl[T]) Sign(msg T) (digest T, err error) {
+func (a *aesGcmKeyImpl[T]) Sign(_ T) (digest T, err error) {
 	err = ErrUnsupportedMethod
 	return
 }
 
-func (a *aesGcmKeyImpl[T]) Verify(msg, digest T) bool {
+func (a *aesGcmKeyImpl[T]) Verify(_, _ T) bool {
 	return false
 }
 
@@ -265,6 +266,11 @@ func (a *aesKeyImportImpl[T]) KeyImport(raw interface{}, alg Algorithm) (Key[T],
 	switch alg {
 	case AesCbc128, AesCbc192, AesCbc256:
 		return &aesCbcKeyImpl[T]{
+			algorithm: alg,
+			key:       key,
+		}, nil
+	case AesGcm128, AesGcm192, AesGcm256:
+		return &aesGcmKeyImpl[T]{
 			algorithm: alg,
 			key:       key,
 		}, nil

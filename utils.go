@@ -41,16 +41,6 @@ func checkAndConvertKey(key interface{}) ([]byte, error) {
 	}
 }
 
-func convertToT[T DataType](src T) (dest T) {
-	switch any(dest).(type) {
-	case []byte:
-		return T(toBytes(src))
-	case string:
-		return T(toString(src))
-	}
-	return
-}
-
 func toString[T DataType](b T) string {
 	switch b := any(b).(type) {
 	case []byte:
