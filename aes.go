@@ -23,15 +23,15 @@ func (a *aesCbcKeyImpl[T]) AlgorithmType() AlgorithmType {
 	return GetTypeByAlgorithm(a.algorithm)
 }
 
-func (a *aesCbcKeyImpl[T]) Bytes() ([]byte, error) {
-	return a.key, nil
+func (a *aesCbcKeyImpl[T]) Bytes() (key T, err error) {
+	return T(toHexString(a.key)), nil
 }
 
-func (a *aesCbcKeyImpl[T]) SKI() []byte {
+func (a *aesCbcKeyImpl[T]) SKI() T {
 	sha := sha256.New()
 	sha.Write(a.key)
 
-	return sha.Sum(nil)
+	return T(toHexString(sha.Sum(nil)))
 }
 
 func (a *aesCbcKeyImpl[T]) PublicKey() (Key[T], error) {
@@ -128,15 +128,15 @@ func (a *aesGcmKeyImpl[T]) AlgorithmType() AlgorithmType {
 	return GetTypeByAlgorithm(a.algorithm)
 }
 
-func (a *aesGcmKeyImpl[T]) Bytes() ([]byte, error) {
-	return a.key, nil
+func (a *aesGcmKeyImpl[T]) Bytes() (key T, err error) {
+	return T(toHexString(a.key)), nil
 }
 
-func (a *aesGcmKeyImpl[T]) SKI() []byte {
+func (a *aesGcmKeyImpl[T]) SKI() T {
 	sha := sha256.New()
 	sha.Write(a.key)
 
-	return sha.Sum(nil)
+	return T(toHexString(sha.Sum(nil)))
 }
 
 func (a *aesGcmKeyImpl[T]) PublicKey() (Key[T], error) {

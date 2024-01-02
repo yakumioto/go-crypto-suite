@@ -3,6 +3,7 @@ package crypto
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"strings"
 )
@@ -45,6 +46,17 @@ func toString[T DataType](b T) string {
 	switch b := any(b).(type) {
 	case []byte:
 		return string(b)
+	case string:
+		return b
+	}
+
+	return ""
+}
+
+func toHexString[T DataType](b T) string {
+	switch b := any(b).(type) {
+	case []byte:
+		return hex.EncodeToString(b)
 	case string:
 		return b
 	}

@@ -8,8 +8,8 @@ type DataType interface {
 
 type Key[T DataType] interface {
 	AlgorithmType() AlgorithmType
-	Bytes() ([]byte, error)
-	SKI() []byte
+	Bytes() (key T, err error)
+	SKI() T
 	PublicKey() (Key[T], error)
 	Sign(msg T) (digest T, err error)
 	Verify(msg, digest T) bool
@@ -25,7 +25,7 @@ type KeyImporter[T DataType] interface {
 	KeyImport(raw interface{}, alg Algorithm) (Key[T], error)
 }
 
-func CryptoKeyImport[T DataType](raw interface{}, alg Algorithm) (Key[T], error) {
+func KeyImport[T DataType](raw interface{}, alg Algorithm) (Key[T], error) {
 	switch alg {
 	case HmacSha256, HmacSha512:
 		return new(hmacShaKeyImportImpl[T]).KeyImport(raw, alg)

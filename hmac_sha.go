@@ -20,15 +20,15 @@ func (h *hmacShaKeyImpl[T]) AlgorithmType() AlgorithmType {
 	return GetTypeByAlgorithm(h.algorithm)
 }
 
-func (h *hmacShaKeyImpl[T]) Bytes() ([]byte, error) {
-	return h.key, nil
+func (h *hmacShaKeyImpl[T]) Bytes() (key T, err error) {
+	return T(toHexString(h.key)), nil
 }
 
-func (h *hmacShaKeyImpl[T]) SKI() []byte {
+func (h *hmacShaKeyImpl[T]) SKI() T {
 	sha := sha256.New()
 	sha.Write(h.key)
 
-	return sha.Sum(nil)
+	return T(toHexString(sha.Sum(nil)))
 }
 
 func (h *hmacShaKeyImpl[T]) PublicKey() (Key[T], error) {

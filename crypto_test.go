@@ -13,8 +13,8 @@ func TestSuite(t *testing.T) {
 	RunSpecs(t, "Crypto Suite")
 }
 
-func ExampleCryptoKeyImport() {
-	key, err := CryptoKeyImport[string]("123456", HmacSha256)
+func ExampleKeyImport() {
+	key, err := KeyImport[string]("123456", HmacSha256)
 	if err != nil {
 		panic(err)
 	}
@@ -26,4 +26,7 @@ func ExampleCryptoKeyImport() {
 	fmt.Println("digest:", digest)
 
 	fmt.Println("verify:", key.Verify("hello world", digest))
+	// output:
+	// digest: 101.g7PrJ4hFe0ai8XqqBI95WvDZ2ruOWSTdL8DqaC2Sn+U=
+	// verify: true
 }
