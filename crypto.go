@@ -29,6 +29,8 @@ func CryptoKeyImport[T DataType](raw interface{}, alg Algorithm) (Key[T], error)
 	switch alg {
 	case HmacSha256, HmacSha512:
 		return new(hmacShaKeyImportImpl[T]).KeyImport(raw, alg)
+	case AesCbc128, AesCbc192, AesCbc256, AesGcm128, AesGcm192, AesGcm256:
+		return new(aesKeyImportImpl[T]).KeyImport(raw, alg)
 	default:
 		return nil, fmt.Errorf("not found key importer: %v", alg)
 	}
